@@ -53,7 +53,16 @@ class Sandbox(BaseNetwork):
         self.syn["dtn"]["AMPA"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
         self.syn["dtn"]["AMPA"].e = -10
         self.syn["dtn"]["AMPA"].tau1 = 0.04
-        self.syn["dtn"]["AMPA"].tau2 = 1.0 
+        self.syn["dtn"]["AMPA"].tau2 = 1.2
+
+        self.syn["dtn"]["AMPA"].tau1 = 1.0
+        self.syn["dtn"]["AMPA"].tau2 = 4.0
+
+        # Rat
+        # self.syn["dtn"]["AMPA"].tau1 = 5.4 #AMPA
+        # self.syn["dtn"]["AMPA"].tau2 = 35.6 #AMPA
+        # self.syn["dtn"]["AMPA"].tau1 = 22.8 #NMDA
+        # self.syn["dtn"]["AMPA"].tau2 = 92.1 #NMDA
 
         self.syn["dtn"]["NMDA"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
         self.syn["dtn"]["NMDA"].e = -10
@@ -61,7 +70,7 @@ class Sandbox(BaseNetwork):
         self.syn["dtn"]["NMDA"].tau2 = 1.2 
 
         self.syn["dtn"]["GABA"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
-        self.syn["dtn"]["GABA"].e = -75
+        self.syn["dtn"]["GABA"].e = -80
         self.syn["dtn"]["GABA"].tau1 = 3.5 
         self.syn["dtn"]["GABA"].tau2 = 20.0 
 
@@ -86,17 +95,32 @@ class Sandbox(BaseNetwork):
         self.nc["Primary->Onset_AMPA"].weight[0] = 0.018
         self.nc["Primary->Onset_AMPA"].delay = 0
 
-        self.nc["Offset->DTN_AMPA"] = h.NetCon(self.cells['Offset'](0.5)._ref_v, self.syn["dtn"]["NMDA"], sec=self.cells['Offset'])
-        self.nc["Offset->DTN_AMPA"].weight[0] = 0.006
-        self.nc["Offset->DTN_AMPA"].delay = 3 
+        self.nc["Offset->DTN_AMPA"] = h.NetCon(self.cells['Offset'](0.5)._ref_v, self.syn["dtn"]["AMPA"], sec=self.cells['Offset'])
+        self.nc["Offset->DTN_AMPA"].weight[0] = 0.003
+        self.nc["Offset->DTN_AMPA"].delay = 1
 
-        self.nc["Onset->DTN_NMDA"] = h.NetCon(self.cells['Onset'](0.5)._ref_v, self.syn["dtn"]["NMDA"], sec=self.cells['Onset'])
-        self.nc["Onset->DTN_NMDA"].weight[0] = 0.006
+        self.nc["Onset->DTN_NMDA"] = h.NetCon(self.cells['Onset'](0.5)._ref_v,self.syn["dtn"]["AMPA"], sec=self.cells['Onset'])
+        self.nc["Onset->DTN_NMDA"].weight[0] = 0.004
         self.nc["Onset->DTN_NMDA"].delay = 15
 
-        self.nc["Primary->DTN_Gly"] = h.NetCon(self.cells['Primary'](0.5)._ref_v, self.syn["dtn"]["Gly"], sec=self.cells['Primary'])
-        self.nc["Primary->DTN_Gly"].weight[0] = 0.0010
-        self.nc["Primary->DTN_Gly"].delay = 5
+        self.nc["Primary->DTN_Gly"] = h.NetCon(self.cells['Primary'](0.5)._ref_v, self.syn["dtn"]["GABA"], sec=self.cells['Primary'])
+        self.nc["Primary->DTN_Gly"].weight[0] = 0.001
+        self.nc["Primary->DTN_Gly"].delay = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ######
 # Used in poster

@@ -10,26 +10,25 @@ delay = 50 # ms
 
 # Single Tone Mode
 duration = range(1,26,1)
-#duration = [1, 5, 15]
+duration = [5,10,15,40]
 
 # Paired Pulse Gap Mode
-GAP_MODE = True
+GAP_MODE = False
 GAP_MODE_TONE_DURATION = 1
 GAPS = [i*0.5 for i in range(1,20,1)] 
-print GAPS
 
 # Plotting Parameters
 PLOT_VOLTAGE = True
 PLOT_DTN_SPIKES = False
 PLOT_DTN_COUNT = False
 
-trial = 400 # ms
+trial = 300 # ms
 if GAP_MODE:
     tstop = len(GAPS)*(trial+2)
 else:
     tstop = len(duration)*(trial+2)
 
-plot_cutoff = 70
+plot_cutoff = 50
 GEN_SPIKES = True
 
 repeats = 1
@@ -121,14 +120,25 @@ for repeat in range(repeats):
     # extract spike counts for each trial
     cur_t = delay
     run_dtn_spikes = []
-    for trial_run in duration:
-        new_spikes = []
-        for s in spikes:
-            if s > cur_t and s < cur_t + trial:
-                new_spikes.append(s - cur_t)
-        run_dtn_spikes.append(new_spikes)
-        cur_t = cur_t + trial
-    dtn_spikes.append(run_dtn_spikes)
+
+    if GAP_MODE:
+        for trial_run in GAPS:
+            new_spikes = []
+            for s in spikes:
+                if s > cur_t and s < cur_t + trial:
+                    new_spikes.append(s - cur_t)
+            run_dtn_spikes.append(new_spikes)
+            cur_t = cur_t + trial
+        dtn_spikes.append(run_dtn_spikes)
+    else:
+        for trial_run in duration:
+            new_spikes = []
+            for s in spikes:
+                if s > cur_t and s < cur_t + trial:
+                    new_spikes.append(s - cur_t)
+            run_dtn_spikes.append(new_spikes)
+            cur_t = cur_t + trial
+        dtn_spikes.append(run_dtn_spikes)
 
     trial_voltage = {}
     for c in cells.keys():
@@ -161,7 +171,10 @@ if USE_GLE == False:
         # Calculate spike counts
         fig1 = pylab.figure(1, facecolor='white')
         count = []
-        temp = [[] for d in duration]
+        if GAP_MODE:
+            temp = [[] for d in GAPS]
+        else:
+            temp = [[] for d in duration]
         for run in dtn_spikes:
             c = 0
             for d in run:
@@ -170,7 +183,10 @@ if USE_GLE == False:
         for d in temp:
             count.append(mean(d))
 
-        pylab.plot(duration, count, 'ko-')
+        if GAP_MODE:
+            pylab.plot(GAPS, count, 'ko-')
+        else:
+            pylab.plot(duration, count, 'ko-')
         pylab.axis(ymin=0, ymax=max(count)+1)
 
     if PLOT_DTN_SPIKES:
@@ -195,7 +211,7 @@ if USE_GLE == False:
             if GAP_MODE:
                 for d in GAPS:
                     if len(run[count]) > 0:
-                        pylab.plot(run[count], [d+y_offset for i in range(len(run[count]))], 'k,')
+                        pylab.plot(run[count], [d+y_offset for i in range(len(run[count]))], 'k.', markersize=10.0)
                     count = count + 1
                 y_offset = y_offset + dy
 
