@@ -205,12 +205,14 @@ class FastRebound(BaseModel):
         self(0.5).kht.gkhtbar = self.nstomho(150)
         self(0.5).klt.gkltbar = self.nstomho(200)
         self(0.5).ka.gkabar = self.nstomho(0)
-        self(0.5).ih2.ghbar = self.nstomho(25)
+        self(0.5).ih2.ghbar = self.nstomho(25+205)
         self(0.5).ih2.eh = 10
         self(0.5).leak.g = self.nstomho(2)        
         self(0.5).leak.erev = -65
         self(0.5).ek = -90
         self(0.5).ena = 50    
+
+
 
 # Based on type I-II
 class OnsetB(BaseModel):

@@ -8,49 +8,24 @@ from random import shuffle
 # Parameters
 delay = 50 # ms
 duration = range(1,26,1) 
-duration = [20]
+#duration = [2,5,7]
 
-# RAT Study Bandpass
-#duration = [5,15,26,36,46,56,67,77,87,97,108,118,128,138,149,159,169,180,190,200]
-
-# RAT Study Shortpass
-#duration = [5, 15, 26, 36, 47, 57, 68, 79, 89, 100]
-
-
+# Plotting Parameters
+PLOT_VOLTAGE = False
+PLOT_DTN_SPIKES = True
+PLOT_DTN_COUNT = False
 
 trial = 400 # ms
 tstop = len(duration)*(trial+2)
 input_prefix = 'repeat'
 input_prefix = 'fixed'
 input_runs = 100
-plot_cutoff = 100
-max_repeats = 15 # Number of distinct AN inputs
-GEN_SPIKES = False
-
-plot_prefix = 'matchUW231_4_008'
-plot_prefix = 'matchRAT39.164'
-plot_prefix = 'matchRAT9.39'
-plot_prefix = 'test'
+plot_cutoff = 70
+GEN_SPIKES = True
 
 repeats = 1
 USE_GLE = False
 
-# Produce a random array of inputs
-prefix_order = []
-if input_prefix == 'repeat':
-    while len(prefix_order) < repeats:
-        options = range(1, max_repeats+1)
-        shuffle(options)
-        for i in options:
-            if len(prefix_order) < repeats:
-                prefix_order.append(i)
-    print prefix_order
-
-
-# Plotting Parameters
-PLOT_VOLTAGE = True
-PLOT_DTN_SPIKES = True
-PLOT_DTN_COUNT = True
 
 ##################################
 ## SETUP AND RUN THE SIMULATION ##
@@ -79,35 +54,6 @@ for repeat in range(repeats):
     # Setting the temperature high is key.
     h.celsius = 30
 
-    def loadSpikes():
-        global ic
-        global icN
-        global delay
-        global duration
-        global trial
-        global input_runs
-
-        runs = input_runs     # number of neurons
-        trial_num = 0
-        input_suffix = input_prefix
-        if input_suffix == 'repeat':
-            input_suffix = '_'+str(prefix_order[repeat])
-
-        for d in duration:
-            filename = '../inputs/'+'spikes'+str(d)+'ms_'+str(runs)+input_suffix+'.pkl'
-            file = open(filename, 'rb')
-            trains = pickle.load(file)
-            spikes = []
-            for t in trains:
-                for i in t:
-                    spikes.append(i)
-            spikes.sort()
-            offset = delay+trial*trial_num
-            for s in spikes:
-                for i in input:
-                    nc[i].event(s+offset)
-            trial_num = trial_num + 1
-
     def generateSpikes():
         global ic
         global icN
@@ -115,7 +61,7 @@ for repeat in range(repeats):
         global duration
         global trial
         
-        rate = 1500 # Hz
+        rate = 1000 # Hz
         trial_num = 0
         
         for d in duration:
@@ -139,10 +85,7 @@ for repeat in range(repeats):
     nc["DTN_spikes"].record(spikes)
 
     # run the stimulation
-    if GEN_SPIKES == False:
-        fih = h.FInitializeHandler(0,loadSpikes)
-    else:
-        fih = h.FInitializeHandler(0,generateSpikes)
+    fih = h.FInitializeHandler(0,generateSpikes)
         
     h.load_file("stdrun.hoc")
     h.init()
@@ -181,15 +124,6 @@ if USE_GLE == True:
 
     if PLOT_DTN_COUNT:
         GLE.meanspikespertrial(plot_prefix+'_means', duration, [dtn_spikes])
-
-
-
-
-
-
-
-
-
 
 
 
@@ -261,24 +195,6 @@ if USE_GLE == False:
         if input_suffix == 'repeat':
             input_suffix = '_'+str(repeat+1)
 
-        # Plot input spikes PSTH
-        for d in duration:
-            filename = '../inputs/'+'spikes'+str(d)+'ms_'+str(input_runs)+input_suffix+'.pkl'
-            file = open(filename, 'rb')
-            trains = pickle.load(file)
-            spikes = []
-            for train in trains:
-                for i in train:
-                    spikes.append(i)
-            spikes.sort()
-            offset = delay+trial_num*trial
-            cur_t = 0
-            for s in spikes:
-                if s > cur_t+1:
-                    cur_t = int(s) # int() is essentially floor()
-                psth[cur_t+offset] = psth[cur_t+offset] + 1
-            trial_num = trial_num + 1
-
         count = count + 1
         pylab.subplot(num_plots, 1, count, title='Input PSTH')
         pylab.bar(psth_t, psth, fc='black')
@@ -287,7 +203,6 @@ if USE_GLE == False:
         for c in net.plot_order:
             count = count + 1
             pylab.subplot(num_plots, 1, count, title=c)
-            #pylab.plot(t, avg_voltage[c], color='black')
             pylab.plot(t, avg_voltage[c], color='black')
             pylab.axis([-delay, h.tstop-delay, y_min, y_max])
             ax = pylab.gca()
