@@ -7,49 +7,53 @@ from random import shuffle
 
 # Parameters
 delay = 50 # ms
-
-# Single Tone Mode
-duration = range(1,26,1)
-duration = [5,10,15,40]
-
-# Paired Pulse Gap Mode
-GAP_MODE = False
-GAP_MODE_TONE_DURATION = 1
-GAPS = [i*0.5 for i in range(1,20,1)] 
-
-# Plotting Parameters
+trial = 300 # ms
 PLOT_VOLTAGE = True
 PLOT_DTN_SPIKES = False
 PLOT_DTN_COUNT = False
-
-trial = 300 # ms
-if GAP_MODE:
-    tstop = len(GAPS)*(trial+2)
-else:
-    tstop = len(duration)*(trial+2)
-
-plot_cutoff = 50
-GEN_SPIKES = True
-
-repeats = 1
 USE_GLE = False
+plot_cutoff = 50
+repeats = 1
+
+# Produce Stimuli
+# [ 
+#     [ [on, off], [on, off], ..., [on, off] ],   <-- Trial 1
+#     [ [on, off], [on, off], ..., [on, off] ],   <-- Trial 2
+#     [ [on, off], [on, off], ..., [on, off] ],   <-- Trial 3
+# ]
+stimuli = [
+    [ [0.0, 1.0] ],
+    [ [0.0, 2.0] ],
+    [ [0.0, 3.0] ],
+    [ [0.0, 4.0] ],
+    [ [0.0, 5.0] ],
+    [ [0.0, 6.0] ],
+    [ [0.0, 7.0] ],
+    [ [0.0, 8.0] ],
+    [ [0.0, 9.0] ],
+    [ [0.0, 10.0] ]
+]
+
+
+tstop = len(stimuli)*(trial)+delay
 
 
 ##################################
 ## SETUP AND RUN THE SIMULATION ##
 ##################################
 from neuron import h
-import pickle
 
 def mean(numberList):
     floatNums = [float(x) for x in numberList]
     return sum(floatNums) / len(numberList)
 
-dtn_spikes = []
-voltage = []
+
+
 for repeat in range(repeats):
+    dtn_spikes = []
+    voltage = []
     print "Running trial "+str(repeat+1)+" of "+str(repeats)
-    # Load the network
+# Load the network
     from cells import Sandbox as network
 
     net = network()
@@ -57,59 +61,56 @@ for repeat in range(repeats):
     syn = net.syn
     nc = net.nc
     input = net.input
+    input_type = net.input_type
+    input_delay = net.input_delay
 
 
-    # Setting the temperature high is key.
+# Setting the temperature high is key.
     h.celsius = 30
 
     def generateSpikes():
-        global ic
-        global icN
         global delay
-        global duration
+        global stimuli
         global trial
-        global GAP_MODE
-        global GAP_MODE_TONE_DURATION
-        global GAPS
+        global input
+        global input_type
+        global input_delay
         
         rate = 1000 # Hz
         trial_num = 0
         
-        if GAP_MODE:
-            for g in GAPS:
-                spikes = []
-                offset = delay+trial*trial_num
-                dt = 1000.0 / rate
-                for t in [i * dt for i in range(int(GAP_MODE_TONE_DURATION /dt)+1)]:
-                    spikes.append(t)
-                for s in spikes:
-                    for i in input:
-                        nc[i].event(s+offset)
-                        nc[i].event(s+offset+g+GAP_MODE_TONE_DURATION)
-                trial_num = trial_num + 1
+        for trials in stimuli:
+            spikes = []
+            offset = delay+trial*trial_num
+            dt = 1000.0 / rate # Gap between spikes
 
-        else:
-            for d in duration:
-                spikes = []
-                offset = delay+trial*trial_num
-                dt = 1000.0 / rate # Gap between spikes
-                for t in [i * dt for i in range(int(d / dt)+1)]:
-                    spikes.append(t)
-                for s in spikes:
-                    for i in input:
-                        nc[i].event(s+offset)
-                trial_num = trial_num + 1
+            for i in range(len(input)):
+                if input_type[i] == 'SUS':
+                    for pulse in trials:
+                        for t in [tp * dt for tp in range( int((pulse[1]-pulse[0])/dt) )]:
+                            nc[input[i]].event(t+pulse[0]+offset+input_delay[i])
 
-    # Record time vector
+                if input_type[i] == 'ON':
+                    for pulse in trials:
+                        nc[input[i]].event(pulse[0]+offset+input_delay[i])
+
+                if input_type[i] == 'OFF':
+                    for pulse in trials:
+                        nc[input[i]].event(pulse[1]+offset+input_delay[i])
+
+            trial_num = trial_num + 1
+
+
+# Record time vector
     t = h.Vector()
     t.record(h._ref_t)
 
-    # Record spike times
+# Record spike times
     nc["DTN_spikes"] = h.NetCon(cells['dtn'](0.5)._ref_v, None, sec=cells['dtn'])
     spikes = h.Vector()
     nc["DTN_spikes"].record(spikes)
 
-    # run the stimulation
+# run the stimulation
     fih = h.FInitializeHandler(0,generateSpikes)
         
     h.load_file("stdrun.hoc")
@@ -117,28 +118,18 @@ for repeat in range(repeats):
     h.tstop = tstop
     h.run()
 
-    # extract spike counts for each trial
+# extract spike counts for each trial
     cur_t = delay
     run_dtn_spikes = []
 
-    if GAP_MODE:
-        for trial_run in GAPS:
-            new_spikes = []
-            for s in spikes:
-                if s > cur_t and s < cur_t + trial:
-                    new_spikes.append(s - cur_t)
-            run_dtn_spikes.append(new_spikes)
-            cur_t = cur_t + trial
-        dtn_spikes.append(run_dtn_spikes)
-    else:
-        for trial_run in duration:
-            new_spikes = []
-            for s in spikes:
-                if s > cur_t and s < cur_t + trial:
-                    new_spikes.append(s - cur_t)
-            run_dtn_spikes.append(new_spikes)
-            cur_t = cur_t + trial
-        dtn_spikes.append(run_dtn_spikes)
+    for trial_run in stimuli:
+        new_spikes = []
+        for s in spikes:
+            if s > cur_t and s < cur_t + trial:
+                new_spikes.append(s - cur_t)
+        run_dtn_spikes.append(new_spikes)
+        cur_t = cur_t + trial
+    dtn_spikes.append(run_dtn_spikes)
 
     trial_voltage = {}
     for c in cells.keys():
@@ -146,6 +137,32 @@ for repeat in range(repeats):
         for v in cells[c].rec_v:
             trial_voltage[c].append(v)
     voltage.append(trial_voltage)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 print 'Plotting Results' 
@@ -189,6 +206,7 @@ if USE_GLE == False:
             pylab.plot(duration, count, 'ko-')
         pylab.axis(ymin=0, ymax=max(count)+1)
 
+
     if PLOT_DTN_SPIKES:
         # Calculate spike counts
         fig2 = pylab.figure(2, facecolor='white')
@@ -226,6 +244,8 @@ if USE_GLE == False:
             pylab.axis(ymin=min(GAPS)-0.2, ymax=max(GAPS)+1, xmin=-5, xmax=plot_cutoff)
         else:
             pylab.axis(ymin=min(duration)-0.2, ymax=max(duration)+1, xmin=-5, xmax=plot_cutoff)
+
+
 
     if PLOT_VOLTAGE:
 

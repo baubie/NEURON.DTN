@@ -9,6 +9,8 @@ class BaseNetwork:
         self.nc = {}
         self.plots = {}
         self.input = [] 
+        self.input_type = []
+        self.input_delay = []
         self.plot_order = []
 
 
@@ -21,6 +23,8 @@ class Sandbox(BaseNetwork):
 
         self.plot_order = ['dtn']
         self.input = ['Onset','Offset','Sustain']
+        self.input_type = ['ON', 'OFF', 'SUS']
+        self.input_delay = [15.0, 5.0, 0.0]
 
         # Create synapses on cells
         # AMPA Receptors
@@ -59,9 +63,9 @@ class Sandbox(BaseNetwork):
         self.nc["Onset"].weight[0] = 0.005
 
         self.nc["Offset"] = h.NetCon(None, self.syn["dtn"]["NMDA"])
-        self.nc["Offset"].weight[0] = 0.005
+        self.nc["Offset"].weight[0] = 0#.005
 
         self.nc["Sustain"] = h.NetCon(None, self.syn["dtn"]["GABA"])
-        self.nc["Sustain"].weight[0] = 0.005
+        self.nc["Sustain"].weight[0] = 0#.005
 
 
