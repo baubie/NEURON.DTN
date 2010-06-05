@@ -50,7 +50,7 @@ voltage = []
 for repeat in range(repeats):
     print "Running trial "+str(repeat+1)+" of "+str(repeats)
     # Load the network
-    from networks import Sandbox as network
+    from cells import Sandbox as network
 
     net = network()
     cells = net.cells
