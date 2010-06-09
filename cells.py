@@ -80,7 +80,7 @@ class Rat(BaseNetwork):
     def __init__(self):
         BaseNetwork.__init__(self)
 
-        self.cells['dtn'] = m.Primary()
+        self.cells['dtn'] = m.PrimaryLarge()
         self.syn['dtn'] = {}
 
         self.plot_order = ['dtn']
@@ -89,7 +89,7 @@ class Rat(BaseNetwork):
 
         n = 3.0
 
-        self.input_delay = [19.0+50+uniform(-n,n), 14.0+uniform(-n,n), 3.0, 2.0+uniform(-n,n)]
+        self.input_delay = [19.0+40+uniform(-n,n), 14.0+uniform(-n,n), 3.0, 2.0+uniform(-n,n)]
         self.input_size = [1, 2, 3, 3]
 
         # Create synapses on cells
@@ -100,8 +100,8 @@ class Rat(BaseNetwork):
         self.syn["dtn"]["AMPA"].tau2 = 1.5
 
         # Rat
-        self.syn["dtn"]["AMPA"].tau1 = 5.4 #AMPA
-        self.syn["dtn"]["AMPA"].tau2 = 35.6 #AMPA
+        self.syn["dtn"]["AMPA"].tau1 = 10.4 #AMPA
+        self.syn["dtn"]["AMPA"].tau2 = 75.6 #AMPA
 
         self.syn["dtn"]["NMDA"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
         self.syn["dtn"]["NMDA"].e = -10
@@ -124,15 +124,15 @@ class Rat(BaseNetwork):
 
         # Setup Network Connections
         self.nc["Onset"] = h.NetCon(None, self.syn["dtn"]["AMPA"])
-        self.nc["Onset"].weight[0] = 0.0060 - 0.0045
+        self.nc["Onset"].weight[0] = 0.0014
 
         self.nc["Offset"] = h.NetCon(None, self.syn["dtn"]["AMPA"])
-        self.nc["Offset"].weight[0] = 0.0055 - 0.0045
+        self.nc["Offset"].weight[0] = 0.0017
 
         self.nc["Sustain"] = h.NetCon(None, self.syn["dtn"]["GABA"])
         self.nc["Sustain"].weight[0] = 0.00003
 
         self.nc["OnsetInh"] = h.NetCon(None, self.syn["dtn"]["Glyc"])
-        self.nc["OnsetInh"].weight[0] = 0.0005
+        self.nc["OnsetInh"].weight[0] = 0.0004
 
 

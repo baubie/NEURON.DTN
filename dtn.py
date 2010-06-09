@@ -13,7 +13,10 @@ PLOT_VOLTAGE = True
 PLOT_DTN_SPIKES = True
 PLOT_DTN_COUNT = True
 USE_GLE = False
-plot_cutoff = 50
+
+DATA_SAVE_NAME = "Rat"
+
+plot_cutoff = 200
 repeats = 15
 
 # Produce Stimuli
@@ -24,9 +27,9 @@ repeats = 15
 # ]
 
 # Duration Tuning Test
-stimuli = [ [ [0.0, d] ] for d in range(1, 26,1) ]
+#stimuli = [ [ [0.0, d] ] for d in range(1, 26,1) ]
 #stimuli = [ [ [0.0, d] ] for d in [1,2,5] ]
-#stimuli = [ [ [0.0, d] ] for d in range(2, 101,2) ]
+stimuli = [ [ [0.0, d] ] for d in range(2, 101,2) ]
 
 # Paired-Pulse Tuning Test
 PP_Length = 1.0
@@ -52,7 +55,7 @@ voltage = []
 for repeat in range(repeats):
     print "Running trial "+str(repeat+1)+" of "+str(repeats)
 # Load the network
-    from cells import Bat as network
+    from cells import Rat as network
 
     net = network()
     cells = net.cells
@@ -196,6 +199,7 @@ if USE_GLE == True:
 # plot results
 if USE_GLE == False:
     import pylab
+    import csv
 
     if PLOT_DTN_COUNT:
         # Calculate spike counts
@@ -213,6 +217,11 @@ if USE_GLE == False:
         pylab.plot(range(1,len(stimuli)+1), count, 'ko-')
         pylab.axis(ymin=0, ymax=max(count)+1)
 
+        if DATA_SAVE_NAME != False:
+           w = csv.writer(open(DATA_SAVE_NAME+"_count.dat", 'w'), delimiter=",", quoting=csv.QUOTE_MINIMAL)
+           for i in range(0, len(stimuli)):
+               w.writerow([(i+1)*2, count[i]])
+
 
     if PLOT_DTN_SPIKES:
         # Calculate spike counts
@@ -220,6 +229,9 @@ if USE_GLE == False:
         count = 0;
         dy = 1.0 / repeats
         y_offset = 0.0 
+
+        if DATA_SAVE_NAME != False:
+           w = csv.writer(open(DATA_SAVE_NAME+"_spikes.dat", 'w'), delimiter=",", quoting=csv.QUOTE_MINIMAL)
 
         # Plot the stimuli
         d = 1
@@ -236,6 +248,10 @@ if USE_GLE == False:
             for s in stimuli:
                 if len(run[count]) > 0:
                     pylab.plot(run[count], [d+y_offset for i in range(len(run[count]))], 'k,')
+                    if DATA_SAVE_NAME != False:
+                       for i in range(0, len(run[count])):
+                           w.writerow([run[count][i], d*2+y_offset*2])
+
                 count = count + 1
                 d = d + 1
             y_offset = y_offset + dy
