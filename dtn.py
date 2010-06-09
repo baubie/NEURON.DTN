@@ -16,7 +16,7 @@ USE_GLE = False
 
 DATA_SAVE_NAME = "Rat"
 
-plot_cutoff = 200
+plot_cutoff = 300
 repeats = 15
 
 # Produce Stimuli
@@ -29,7 +29,7 @@ repeats = 15
 # Duration Tuning Test
 #stimuli = [ [ [0.0, d] ] for d in range(1, 26,1) ]
 #stimuli = [ [ [0.0, d] ] for d in [1,2,5] ]
-stimuli = [ [ [0.0, d] ] for d in range(2, 101,2) ]
+stimuli = [ [ [0.0, d] ] for d in range(5, 201,5) ]
 
 # Paired-Pulse Tuning Test
 PP_Length = 1.0
@@ -220,7 +220,7 @@ if USE_GLE == False:
         if DATA_SAVE_NAME != False:
            w = csv.writer(open(DATA_SAVE_NAME+"_count.dat", 'w'), delimiter=",", quoting=csv.QUOTE_MINIMAL)
            for i in range(0, len(stimuli)):
-               w.writerow([(i+1)*2, count[i]])
+               w.writerow([(i+1)*5, count[i]])
 
 
     if PLOT_DTN_SPIKES:
@@ -250,7 +250,7 @@ if USE_GLE == False:
                     pylab.plot(run[count], [d+y_offset for i in range(len(run[count]))], 'k,')
                     if DATA_SAVE_NAME != False:
                        for i in range(0, len(run[count])):
-                           w.writerow([run[count][i], d*2+y_offset*2])
+                           w.writerow([run[count][i], (d+y_offset)*5])
 
                 count = count + 1
                 d = d + 1
