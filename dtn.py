@@ -14,10 +14,10 @@ PLOT_DTN_SPIKES = True
 PLOT_DTN_COUNT = True
 USE_GLE = False
 
-DATA_SAVE_NAME = "Rat"
+DATA_SAVE_NAME = False
 
-plot_cutoff = 300
-repeats = 15
+plot_cutoff = 50
+repeats = 1
 
 # Produce Stimuli
 # [ 
@@ -27,14 +27,16 @@ repeats = 15
 # ]
 
 # Duration Tuning Test
-#stimuli = [ [ [0.0, d] ] for d in range(1, 26,1) ]
+stimuli = [ [ [0.0, d] ] for d in range(1, 26,1) ]
 #stimuli = [ [ [0.0, d] ] for d in [1,2,5] ]
-stimuli = [ [ [0.0, d] ] for d in range(5, 201,5) ]
+#stimuli = [ [ [0.0, d] ] for d in range(5, 201,5) ]
 
 # Paired-Pulse Tuning Test
-PP_Length = 1.0
-#stimuli = [ [ [0.0, PP_Length], [PP_Length+d*0.5, PP_Length*2+d*0.5] ] for d in range(1, 21) ]
-
+PP_Length = 0.5
+PP_step = 0.1
+PP_max_sep = 3.0
+stimulipp = [ [ [0.0, PP_Length], [PP_Length+d*PP_step, PP_Length*2+d*PP_step] ] for d in range(0, PP_max_sep/PP_step) ]
+stimuli = stimuli+stimulipp
 
 tstop = len(stimuli)*(trial)+delay
 
@@ -55,7 +57,7 @@ voltage = []
 for repeat in range(repeats):
     print "Running trial "+str(repeat+1)+" of "+str(repeats)
 # Load the network
-    from cells import Rat as network
+    from cells import BatCEC2000 as network
 
     net = network()
     cells = net.cells
@@ -68,7 +70,7 @@ for repeat in range(repeats):
 
 
 # Setting the temperature high is key.
-    h.celsius = 30
+    h.celsius = 37
 
     def generateSpikes():
         global delay
@@ -81,11 +83,12 @@ for repeat in range(repeats):
         
         rate = 1000 # Hz
         trial_num = 0
+        ref = 0.8
         
         for trials in stimuli:
             spikes = []
             offset = delay+trial*trial_num
-            dt = 900.0 / rate # Gap between spikes
+            dt = 1000.0 / rate # Gap between spikes
             last_spike = -999
 
             for i in range(len(input)):
@@ -94,7 +97,7 @@ for repeat in range(repeats):
                     for pulse in trials:
                         for t in [tp * dt for tp in range( max(int((pulse[1]-pulse[0])/dt)+1, input_size[i]))]:
                             spike_time = t+pulse[0]+offset+input_delay[i]
-                            if spike_time - last_spike >= 1.0:
+                            if spike_time - last_spike >= ref:
                                 nc[input[i]].event(spike_time)
                                 last_spike = spike_time
 
@@ -102,7 +105,7 @@ for repeat in range(repeats):
                     for pulse in trials:
                         for x in range(input_size[i]):
                             spike_time = pulse[0]+offset+input_delay[i]+x*1.5
-                            if spike_time - last_spike >= 1.0:
+                            if spike_time - last_spike >= ref:
                                 nc[input[i]].event(spike_time)
                                 last_spike = spike_time
 
@@ -110,7 +113,7 @@ for repeat in range(repeats):
                     for pulse in trials:
                         for x in range(input_size[i]):
                             spike_time = pulse[1]+offset+input_delay[i]+x*1.5
-                            if spike_time - last_spike >= 1.0:
+                            if spike_time - last_spike >= ref:
                                 nc[input[i]].event(spike_time)
                                 last_spike = spike_time
 

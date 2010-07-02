@@ -73,7 +73,7 @@ class Primary(nrn.Section):
 
         self(0.5).hhfast.gnabar = 0.150
         self(0.5).hhfast.gkbar = 0.036
-        self(0.5).ena = 50
+        self(0.5).ena = 55
         self(0.5).ek = -90
 
 class PrimaryLarge(nrn.Section):
