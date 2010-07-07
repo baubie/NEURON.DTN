@@ -83,7 +83,7 @@ class BatCEC2000(BaseNetwork):
         self.input = ['Inh','Inh2','Exc', 'Exc2']
         self.input_type = ['SUS', 'SUS', 'SUS', 'SUS']
 
-        n = 0.5
+        n = 0.0
 
         self.input_delay = [5.0, 15.0, 8.0, 10.0]
         self.input_delay = [v+uniform(-n,n) for v in self.input_delay]
@@ -97,7 +97,7 @@ class BatCEC2000(BaseNetwork):
         self.syn["dtn"]["AMPA"].tau2 = 1.2
 
         self.syn["dtn"]["NMDA"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
-        self.syn["dtn"]["NMDA"].e = 0
+        self.syn["dtn"]["NMDA"].e = 0 
         self.syn["dtn"]["NMDA"].tau1 = 3.00
         self.syn["dtn"]["NMDA"].tau2 = 13.0 
 
@@ -116,6 +116,8 @@ class BatCEC2000(BaseNetwork):
         self.syn["dtn"]["Glyc"].tau2 = 20.0 
 
         # Setup Network Connections
+
+        # Inhibition at 0.006 works well
         self.nc["Inh"] = h.NetCon(None, self.syn["dtn"]["GABA"])
         self.nc["Inh"].weight[0] = 0.006
 

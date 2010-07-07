@@ -71,7 +71,7 @@ class Primary(nrn.Section):
         self.diam = lstd
         self.nseg = 1
 
-        self(0.5).hhfast.gnabar = 0.150
+        self(0.5).hhfast.gnabar = 0.15
         self(0.5).hhfast.gkbar = 0.036
         self(0.5).ena = 55
         self(0.5).ek = -90
