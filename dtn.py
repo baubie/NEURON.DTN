@@ -15,7 +15,7 @@ def runSimulation(data_filename, ncParams, synParams):
     PLOT_VOLTAGE = False
     PLOT_DTN_SPIKES = True
     PLOT_DTN_COUNT = True
-    SHOW_PLOTS = False
+    SHOW_PLOTS = True
     USE_GLE = False
 
 
@@ -39,7 +39,7 @@ def runSimulation(data_filename, ncParams, synParams):
 #stimuli = [ [ [0.0, d] ] for d in range(5, 201,5) ]
 
 # Paired-Pulse Tuning Test
-    PP_Length = 0.5
+    PP_Length = 0.1
     PP_step = 0.1
     PP_max_sep = 3.0
     stimulipp = [ [ [0.0, PP_Length], [PP_Length+d*PP_step, PP_Length*2+d*PP_step] ] for d in range(0, PP_max_sep/PP_step) ]
@@ -61,7 +61,7 @@ def runSimulation(data_filename, ncParams, synParams):
     for repeat in range(repeats):
         print "Running trial "+str(repeat+1)+" of "+str(repeats)
 # Load the network
-        from cells import BatCEC2000 as network
+        from cells import BatCEC2000_BP as network
 
         net = network()
         cells = net.cells

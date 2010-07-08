@@ -130,6 +130,10 @@ class BatCEC2000(BaseNetwork):
         self.nc["Exc2"].weight[0] = 0.0006
 
 
+class BatCEC2000_BP(BatCEC2000):
+    def __init__(self):
+        BatCEC2000.__init__(self)
+        self.input_size = [3, 1, 1, 1]
 
 
 
