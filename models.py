@@ -74,8 +74,8 @@ class Primary(nrn.Section):
         self(0.5).hhfast.gkbar = 0.036
         self(0.5).ena = 55
         self(0.5).ek = -90
-        self(0.5).hhfast.el = -68
-        self(0.5).hhfast.gl = 0.001
+        self(0.5).hhfast.el = -60
+        self(0.5).hhfast.gl = 0.0009
 
 class PrimaryLarge(nrn.Section):
     def __init__(self):
