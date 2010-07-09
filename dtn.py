@@ -12,10 +12,10 @@ def runSimulation(data_filename, ncParams, synParams):
 # Parameters
     delay = 50 # ms
     trial = 333 # ms
-    PLOT_VOLTAGE = False
+    PLOT_VOLTAGE = True
     PLOT_DTN_SPIKES = True
     PLOT_DTN_COUNT = True
-    SHOW_PLOTS = True
+    SHOW_PLOTS = False
     USE_GLE = False
 
 

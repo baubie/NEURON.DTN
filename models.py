@@ -63,7 +63,6 @@ class Primary(nrn.Section):
         self.rec_v.record(self(0.5)._ref_v)        
 
         self.insert('hhfast')
-        self.insert('pas')
         
         # Parameters
         lstd = 18
@@ -75,6 +74,8 @@ class Primary(nrn.Section):
         self(0.5).hhfast.gkbar = 0.036
         self(0.5).ena = 55
         self(0.5).ek = -90
+        self(0.5).hhfast.el = -68
+        self(0.5).hhfast.gl = 0.001
 
 class PrimaryLarge(nrn.Section):
     def __init__(self):
