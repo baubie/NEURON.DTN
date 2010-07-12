@@ -80,21 +80,22 @@ class BatCEC2000(BaseNetwork):
         self.syn['dtn'] = {}
 
         self.plot_order = ['dtn']
-        self.input = ['Inh','Inh2','Exc', 'Exc2']
-        self.input_type = ['SUS', 'SUS', 'SUS', 'SUS']
+        self.input = ['Inh','Inh2','Inh3', 'Exc']
+        self.input_type = ['SUS', 'SUS', 'ON', 'SUS']
 
         n = 0.0
 
-        self.input_delay = [5.0, 15.0, 8.0, 10.0]
+        self.input_delay = [6.0, 22.0, 6.0, 12.0]
         self.input_delay = [v+uniform(-n,n) for v in self.input_delay]
-        self.input_size = [2, 1, 1, 1]
+        self.input_size = [1, 1, 1, 1]
+
 
         # Create synapses on cells
         # AMPA Receptors
         self.syn["dtn"]["AMPA"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
         self.syn["dtn"]["AMPA"].e = 0
         self.syn["dtn"]["AMPA"].tau1 = 0.1
-        self.syn["dtn"]["AMPA"].tau2 = 1.2
+        self.syn["dtn"]["AMPA"].tau2 = 2.0
 
         self.syn["dtn"]["NMDA"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
         self.syn["dtn"]["NMDA"].e = 0 
@@ -110,6 +111,11 @@ class BatCEC2000(BaseNetwork):
         self.syn["dtn"]["GABA"].tau1 = 0.1
         self.syn["dtn"]["GABA"].tau2 = 12.0 
 
+        self.syn["dtn"]["GABA2"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
+        self.syn["dtn"]["GABA2"].e = -80
+        self.syn["dtn"]["GABA2"].tau1 = 0.1
+        self.syn["dtn"]["GABA2"].tau2 = 6.0 
+
         self.syn["dtn"]["Glyc"] = h.Exp2Syn(0.5, sec=self.cells['dtn'])
         self.syn["dtn"]["Glyc"].e = -95
         self.syn["dtn"]["Glyc"].tau1 = 1.5 
@@ -118,22 +124,23 @@ class BatCEC2000(BaseNetwork):
         # Setup Network Connections
 
         # Inhibition at 0.006 works well
-        self.nc["Inh"] = h.NetCon(None, self.syn["dtn"]["GABA"])
-        self.nc["Inh"].weight[0] = 0.006
+        self.nc["Inh"] = h.NetCon(None, self.syn["dtn"]["GABA2"])
+        self.nc["Inh"].weight[0] = 0.004
 
         self.nc["Inh2"] = h.NetCon(None, self.syn["dtn"]["GABA"])
         self.nc["Inh2"].weight[0] = 0.006
 
+        self.nc["Inh3"] = h.NetCon(None, self.syn["dtn"]["GABA2"])
+        self.nc["Inh3"].weight[0] = 0.010
+
         self.nc["Exc"] = h.NetCon(None, self.syn["dtn"]["AMPA"])
-        self.nc["Exc"].weight[0] = 0.008
-        self.nc["Exc2"] = h.NetCon(None, self.syn["dtn"]["NMDA"])
-        self.nc["Exc2"].weight[0] = 0.0006
+        self.nc["Exc"].weight[0] = 0.0040
 
 
 class BatCEC2000_BP(BatCEC2000):
     def __init__(self):
         BatCEC2000.__init__(self)
-        self.input_size = [3, 1, 1, 1]
+        #self.input_size = [3, 1, 1, 1]
 
 
 

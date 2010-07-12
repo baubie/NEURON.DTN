@@ -2,10 +2,11 @@
 import dtn
 
 
-#dtn.runSimulation("", [["Inh", 0.006],["Inh2", 0.006]], [])
+#dtn.runSimulation("",[], []) 
+#quit()
 
-for i in range(0, 12):
-    inh = i*0.0005+0.004
-    name = "PLT-%.4f"%inh
-    dtn.runSimulation(name, [["Inh", inh],["Inh2", inh]], [])
+for i in range(0, 10):
+    inh = i*0.0005+0.003
+    name = "EXCRamp/EXCRamp-%.4f"%inh
+    dtn.runSimulation(name, [["Exc", inh]], [])
 

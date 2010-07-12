@@ -6,12 +6,13 @@
 from random import shuffle
 from os import urandom
 from random import uniform
+from random import gauss
 
 
 def runSimulation(data_filename, ncParams, synParams):
 # Parameters
     delay = 50 # ms
-    trial = 333 # ms
+    trial = 300 # ms
     PLOT_VOLTAGE = False
     PLOT_DTN_SPIKES = True
     PLOT_DTN_COUNT = True
@@ -22,7 +23,7 @@ def runSimulation(data_filename, ncParams, synParams):
     DATA_SAVE_NAME = data_filename
 
     plot_cutoff = 50
-    repeats = 15
+    repeats = 20
 
     print "Running Simulation: " + data_filename + "\n NC Params: " + str(ncParams) + "\n Syn Params: " + str(synParams) + "\n=========================================="
 
@@ -35,16 +36,25 @@ def runSimulation(data_filename, ncParams, synParams):
 
 # Duration Tuning Test
     stimuli = [ [ [0.0, d] ] for d in range(1, 26,1) ]
-#stimuli = [ [ [0.0, d] ] for d in [1,2,5] ]
-#stimuli = [ [ [0.0, d] ] for d in range(5, 201,5) ]
+    #stimuli = [ [ [0.0, d] ] for d in [1, 5, 15] ]
+    #stimuli = [ [ [0.0, d] ] for d in range(5, 201,5) ]
+    
 
 # Paired-Pulse Tuning Test
-    PP_Length = 0.1
+    PP_Length = 1.0
     PP_step = 0.1
-    PP_max_sep = 3.0
+    PP_max_sep = 4.0
     stimulipp = [ [ [0.0, PP_Length], [PP_Length+d*PP_step, PP_Length*2+d*PP_step] ] for d in range(0, PP_max_sep/PP_step) ]
     stimuli = stimuli+stimulipp
+
+    BD_Length = 5.0
+    BD_step = 1.0
+    BD_max_sep = 100.0
+
+    stimulipp = [ [ [0.0, BD_Length], [BD_Length+d*BD_step, BD_Length*2+d*BD_step] ] for d in range(0, BD_max_sep/BD_step) ]
+    #stimuli = stimuli+stimulipp
     tstop = len(stimuli)*(trial)+delay
+
 
 
 ##################################
@@ -78,6 +88,7 @@ def runSimulation(data_filename, ncParams, synParams):
 
 # Setting the temperature high is key.
         h.celsius = 37
+        #h.dt = 0.025
 
         def generateSpikes():
             #global delay
@@ -90,34 +101,40 @@ def runSimulation(data_filename, ncParams, synParams):
             
             rate = 1000 # Hz
             trial_num = 0
-            ref = 0.8
+            ref = 1.0
+            count = 0
+            on_recovery = 20.0
             
             for trials in stimuli:
+                count = count + 1
                 spikes = []
                 offset = delay+trial*trial_num
                 dt = 1000.0 / rate # Gap between spikes
                 last_spike = -999
-                jitter = 0.2
+                jitter = 0.025
 
+                on_last_spike = -999
                 for i in range(len(input)):
                     last_spike = -999
+                    #print "\n"+input[i]+" - Trial: "+str(count)
                     if input_type[i] == 'SUS':
                         for pulse in trials:
-                            for t in [tp * dt for tp in range( max(int((pulse[1]-pulse[0])/dt)+1, input_size[i]))]:
-                                spike_time = t+pulse[0]+offset+input_delay[i]
+                            for t in [tp * dt for tp in range( max(int((pulse[1]-pulse[0])/dt), input_size[i]))]:
+                                spike_time = round(t+pulse[0]+offset+input_delay[i] + gauss(0,jitter),2)
                                 if spike_time - last_spike >= ref:
-                                    spike_time = spike_time + uniform(-jitter,jitter)
+                                    #print spike_time
                                     nc[input[i]].event(spike_time)
                                     last_spike = spike_time
 
                     if input_type[i] == 'ON':
                         for pulse in trials:
                             for x in range(input_size[i]):
-                                spike_time = pulse[0]+offset+input_delay[i]+x*1.5
-                                if spike_time - last_spike >= ref:
-                                    spike_time = spike_time + uniform(-jitter,jitter)
+                                spike_time = round(pulse[0]+offset+input_delay[i]+x+uniform(-jitter,jitter),2)
+                                if spike_time - on_last_spike >= on_recovery:
+                                    spike_time = spike_time + gauss(0,jitter)
                                     nc[input[i]].event(spike_time)
                                     last_spike = spike_time
+                                    on_last_spike = last_spike
 
                     if input_type[i] == 'OFF':
                         for pulse in trials:
