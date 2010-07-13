@@ -85,7 +85,7 @@ class BatCEC2000(BaseNetwork):
 
         n = 0.0
 
-        self.input_delay = [6.0, 22.0, 6.0, 12.0]
+        self.input_delay = [6.0, 18.0, 6.0, 12.0]
         self.input_delay = [v+uniform(-n,n) for v in self.input_delay]
         self.input_size = [1, 1, 1, 1]
 
@@ -125,7 +125,7 @@ class BatCEC2000(BaseNetwork):
 
         # Inhibition at 0.006 works well
         self.nc["Inh"] = h.NetCon(None, self.syn["dtn"]["GABA2"])
-        self.nc["Inh"].weight[0] = 0.004
+        self.nc["Inh"].weight[0] = 0.0045
 
         self.nc["Inh2"] = h.NetCon(None, self.syn["dtn"]["GABA"])
         self.nc["Inh2"].weight[0] = 0.006

@@ -16,7 +16,7 @@ def runSimulation(data_filename, ncParams, synParams):
     PLOT_VOLTAGE = False
     PLOT_DTN_SPIKES = True
     PLOT_DTN_COUNT = True
-    SHOW_PLOTS = False
+    SHOW_PLOTS = True
     USE_GLE = False
 
 
@@ -43,7 +43,7 @@ def runSimulation(data_filename, ncParams, synParams):
 # Paired-Pulse Tuning Test
     PP_Length = 1.0
     PP_step = 0.1
-    PP_max_sep = 4.0
+    PP_max_sep = 3.0
     stimulipp = [ [ [0.0, PP_Length], [PP_Length+d*PP_step, PP_Length*2+d*PP_step] ] for d in range(0, PP_max_sep/PP_step) ]
     stimuli = stimuli+stimulipp
 
@@ -111,7 +111,7 @@ def runSimulation(data_filename, ncParams, synParams):
                 offset = delay+trial*trial_num
                 dt = 1000.0 / rate # Gap between spikes
                 last_spike = -999
-                jitter = 0.025
+                jitter = 0.1
 
                 on_last_spike = -999
                 for i in range(len(input)):
